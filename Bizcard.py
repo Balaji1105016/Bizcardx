@@ -9,36 +9,16 @@ from streamlit_option_menu import option_menu
 from PIL import Image, ImageDraw
 
 # Title:
-custom_css = """
-<style>
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+Title_pic_img_path = r"C:\Users\Balaji\Music\Personal_Pic\Title3.jpg"
+Title_pic = Image.open(Title_pic_img_path)
+st.image(Title_pic)
 
-.animated-title {
-    font-size: 36px;
-    font-weight: bold;
-    animation: slideIn 1s ease-in-out;
-}
-</style>
-"""
-
-# Display animated title
-st.markdown(custom_css, unsafe_allow_html=True)
-st.markdown('<p class="animated-title">Vision: Think About Future </p>', unsafe_allow_html=True)
 
 # HTML code for the video
 video_html = '<div style="position: relative; overflow: hidden; padding-top: 56.25%;"><iframe src="https://share.synthesia.io/embeds/videos/0f462ad2-2009-4a72-9029-baeaff5f609e" loading="lazy" title="Synthesia video player - Your AI video" allow="encrypted-media; fullscreen;" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0; margin: 0; overflow:hidden;"></iframe></div>'
 
 # Display the video using st.components.v1.html
-st.components.v1.html(video_html, width=550, height=300, scrolling=False)
+st.components.v1.html(video_html, width=480, height=280)
 
 # Login and Logout Section:
 if 'login_status' not in st.session_state:
@@ -94,7 +74,7 @@ if st.session_state.login_status:
                             "nav-link-selected": {"background-color": "#6F36AD"}})
 
     if menu_sel == "Home":
-        st.title("Vision - THINK ABOUT FUTURE")
+        st.header("Vision - THINK ABOUT FUTURE")
         st.subheader("By")
         Personal_pic_img_path = r"C:\Users\Balaji\Music\Personal_Pic\Balaji_pic.jpeg"
         pic = Image.open(Personal_pic_img_path)
@@ -152,13 +132,17 @@ if st.session_state.login_status:
                 st.subheader("Data Extraction and Data Storage in DB")
                 array = np.array(image)
                 read = r_1.readtext(array)
+                # st.write(read)
                 draw = ImageDraw.Draw(image)
                 # Making a Reactangle:
                 for bounding_box, detect_text, confidence_score in read:
                     top_left, top_right, bottom_right, bottom_left = bounding_box
-                    top_left = tuple(map(int, top_left))
+                    top_left = tuple(map(int, top_left))#-->Converting the floating point numbers to integers
                     bottom_right = tuple(map(int, bottom_right))
                     draw.rectangle([top_left, bottom_right], outline="green", width=2)
+                # st.write(bounding_box)
+                # # st.write(detect_text)
+                # st.write(confidence_score)
                     
                 # Displaying the annotated image
                 st.image(image, caption='Annotated Bizcard', use_column_width=True)
@@ -231,14 +215,30 @@ if st.session_state.login_status:
                         result["City"].append(m3[0])
                         
                 # st.write(result)
-                df = st.dataframe(pd.DataFrame(result))
-                df.balloons()
+                df = pd.DataFrame(result)
+                st.dataframe(df)
+                st.dataframe(df).balloons()
                 df1 = pd.DataFrame(result)
+                
                 for k,l in df1.iterrows():
-                    Query = """INSERT INTO Biz_Card_Details(Company,Card_Holder_Name,Designation,MOB,Email,Website,Area,City,State,Pincode,Card_Pic) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-                    cur.execute(Query,tuple(l))
+                    # Duplicate Record Check:
+                    check_query = """SELECT * FROM Biz_Card_Details WHERE Email = %s ORDER BY ID DESC LIMIT 1"""
+                    cur.execute(check_query, (l['Email'],))
+                    existing_record = cur.fetchone()
+                    if not existing_record:
+                    #  if it is not an existing record:
+                        insert_query = """INSERT INTO Biz_Card_Details(Company,Card_Holder_Name,Designation,MOB,Email,Website,Area,City,State,Pincode,Card_Pic) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+                        cur.execute(insert_query, tuple(l))
+                        st.success(f"Record for {l['Email']} inserted successfully.")
+                    else:
+                        st.warning(f"Record already exists. Skipping the insertion.")
                 db.commit()
-                st.success("""Data Is Saved Successfully Extracted And Stored In DB""")
+                    
+    
+                #     Query = """INSERT INTO Biz_Card_Details(Company,Card_Holder_Name,Designation,MOB,Email,Website,Area,City,State,Pincode,Card_Pic) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+                #     cur.execute(Query,tuple(l))
+                # db.commit()
+                # st.success("""Data Is Saved Successfully Extracted And Stored In DB""")
                 
 
     if menu_sel == "Data Modification":
@@ -583,173 +583,3 @@ if st.session_state.login_status:
         else:
             st.dataframe(df_15)
             st.dataframe(df_15).balloons()
-
-        
-    
-        
-
-
-
-
-
-
-            
-            
-        
-        
-            
-            
-            
-            
-            
-
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        
-                    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-            
-            
-            
-                                
-            
-            
-                       
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-
-            
-            
-            
-                
-            
-            
-            
-                
-                
-  
-      
-      
-      
-      
-    
-    
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-          
-
-    
-
-        
-        
-        
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-        
-        
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-        
-
-        
-        
-        
-        
-        
-       
-        
